@@ -47,7 +47,7 @@ function runCalculator() {
     button.addEventListener('click', () => {
       const buttonValue = button.textContent;
 
-      if (buttonValue === 'C'){
+      if (buttonValue === 'C') {
         screenText.textContent = "0";
         displayValue = "";
         firstNumber = 0;
@@ -63,10 +63,19 @@ function runCalculator() {
 
       else if (buttonValue === "+" || buttonValue === "-" || 
                buttonValue === "*" || buttonValue === "/") {
-        firstNumber = parseFloat(displayValue);
+
+        if (operator && displayValue !== "") {
+          secondNumber = parseFloat(displayValue);
+          firstNumber = operate(operator, firstNumber, secondNumber);
+          screenText.textContent = firstNumber;
+        } else if (displayValue !== "") {
+          firstNumber = parseFloat(displayValue);
+        }
+
         operator = buttonValue;
         operatorJustClicked = true;
         displayValue = "";
+
         if (activeOperatorBtn) {
           activeOperatorBtn.classList.remove('operator-active');
         }
@@ -74,25 +83,26 @@ function runCalculator() {
         activeOperatorBtn = button;
       }
 
-      else if (buttonValue === "="){
-        secondNumber = parseFloat(displayValue);
-        const result = operate(operator, firstNumber, secondNumber);
-        displayValue = result.toString();
-        screenText.textContent = displayValue;
+      else if (buttonValue === "=") {
+        if (operator && displayValue !== "") {
+          secondNumber = parseFloat(displayValue);
+          firstNumber = operate(operator, firstNumber, secondNumber);
+          screenText.textContent = firstNumber;
+        }
 
-        firstNumber = result;
+        displayValue = firstNumber.toString();
         secondNumber = 0;
         operator = "";
         operatorJustClicked = false;
+
         if (activeOperatorBtn) {
           activeOperatorBtn.classList.remove('operator-active');
           activeOperatorBtn = null;
         }
-        return;
       }
 
       else {
-        if(operatorJustClicked){
+        if (operatorJustClicked) {
           displayValue = "";
           operatorJustClicked = false;
         }
