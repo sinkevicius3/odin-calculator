@@ -1,20 +1,20 @@
-function add(a, b){
-  return (a + b);
+function add(a, b) {
+  return a + b;
 }
 
-function subtract(a, b){
-  return (a - b);
+function subtract(a, b) {
+  return a - b;
 }
 
-function multiply(a, b){
-  return (a * b);
+function multiply(a, b) {
+  return a * b;
 }
 
 function divide(a, b) {
   if (b === 0) {
     throw new Error("Division by zero.");
   }
-  return (a / b);
+  return a / b;
 }
 
 function operate(operator, firstNumber, secondNumber) {
@@ -37,11 +37,12 @@ function runCalculator() {
   const numpadBtns = document.querySelectorAll('.numpad-btn');
 
   let displayValue = "";
-  let firstNumber = 0;
-  let secondNumber = 0;
-  let operator = "";
+  let firstNumber = null;
+  let secondNumber = null;
+  let operator = null;
   let operatorJustClicked = false;
   let activeOperatorBtn = null;
+  let justCalculated = false;
 
   numpadBtns.forEach(button => {
     button.addEventListener('click', () => {
@@ -50,10 +51,11 @@ function runCalculator() {
       if (buttonValue === 'C') {
         screenText.textContent = "0";
         displayValue = "";
-        firstNumber = 0;
-        secondNumber = 0;
-        operator = "";
+        firstNumber = null;
+        secondNumber = null;
+        operator = null;
         operatorJustClicked = false;
+        justCalculated = false;
         if (activeOperatorBtn) {
           activeOperatorBtn.classList.remove('operator-active');
           activeOperatorBtn = null;
@@ -61,13 +63,16 @@ function runCalculator() {
         return;
       }
 
-      else if (buttonValue === "+" || buttonValue === "-" || 
-               buttonValue === "*" || buttonValue === "/") {
-
+      if (['+', '-', '*', '/'].includes(buttonValue)) {
         if (operator && displayValue !== "") {
           secondNumber = parseFloat(displayValue);
-          firstNumber = operate(operator, firstNumber, secondNumber);
-          screenText.textContent = firstNumber;
+          try {
+            firstNumber = operate(operator, firstNumber, secondNumber);
+            screenText.textContent = firstNumber.toString().slice(0, 12);
+          } catch (e) {
+            screenText.textContent = e.message;
+            firstNumber = null;
+          }
         } else if (displayValue !== "") {
           firstNumber = parseFloat(displayValue);
         }
@@ -75,40 +80,58 @@ function runCalculator() {
         operator = buttonValue;
         operatorJustClicked = true;
         displayValue = "";
+        justCalculated = false;
 
         if (activeOperatorBtn) {
           activeOperatorBtn.classList.remove('operator-active');
         }
         button.classList.add('operator-active');
         activeOperatorBtn = button;
+        return;
       }
 
-      else if (buttonValue === "=") {
+      if (buttonValue === "=") {
         if (operator && displayValue !== "") {
           secondNumber = parseFloat(displayValue);
-          firstNumber = operate(operator, firstNumber, secondNumber);
-          screenText.textContent = firstNumber;
+          try {
+            firstNumber = operate(operator, firstNumber, secondNumber);
+            screenText.textContent = firstNumber.toString().slice(0, 12);
+          } catch (e) {
+            screenText.textContent = e.message;
+            firstNumber = null;
+          }
         }
 
-        displayValue = firstNumber.toString();
-        secondNumber = 0;
-        operator = "";
+        displayValue = firstNumber ? firstNumber.toString() : "";
+        secondNumber = null;
+        operator = null;
         operatorJustClicked = false;
+        justCalculated = true;
 
         if (activeOperatorBtn) {
           activeOperatorBtn.classList.remove('operator-active');
           activeOperatorBtn = null;
         }
+        return;
       }
 
-      else {
-        if (operatorJustClicked) {
-          displayValue = "";
-          operatorJustClicked = false;
-        }
-        displayValue += buttonValue;
-        screenText.textContent = displayValue;
+      if (justCalculated) {
+        displayValue = "";
+        firstNumber = null;
+        operator = null;
+        justCalculated = false;
       }
+
+      if (operatorJustClicked) {
+        displayValue = "";
+        operatorJustClicked = false;
+      }
+
+      if (displayValue.length < 12) {
+        displayValue += buttonValue;
+      }
+
+      screenText.textContent = displayValue;
     });
   });
 }
