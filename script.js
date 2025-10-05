@@ -31,3 +31,76 @@ function operate(operator, firstNumber, secondNumber) {
       throw new Error("Invalid operator.");
   }
 }
+
+function runCalculator() {
+  const screenText = document.getElementById('screen-text');
+  const numpadBtns = document.querySelectorAll('.numpad-btn');
+
+  let displayValue = "";
+  let firstNumber = 0;
+  let secondNumber = 0;
+  let operator = "";
+  let operatorJustClicked = false;
+  let activeOperatorBtn = null;
+
+  numpadBtns.forEach(button => {
+    button.addEventListener('click', () => {
+      const buttonValue = button.textContent;
+
+      if (buttonValue === 'C'){
+        screenText.textContent = "0";
+        displayValue = "";
+        firstNumber = 0;
+        secondNumber = 0;
+        operator = "";
+        operatorJustClicked = false;
+        if (activeOperatorBtn) {
+          activeOperatorBtn.classList.remove('operator-active');
+          activeOperatorBtn = null;
+        }
+        return;
+      }
+
+      else if (buttonValue === "+" || buttonValue === "-" || 
+               buttonValue === "*" || buttonValue === "/") {
+        firstNumber = parseFloat(displayValue);
+        operator = buttonValue;
+        operatorJustClicked = true;
+        displayValue = "";
+        if (activeOperatorBtn) {
+          activeOperatorBtn.classList.remove('operator-active');
+        }
+        button.classList.add('operator-active');
+        activeOperatorBtn = button;
+      }
+
+      else if (buttonValue === "="){
+        secondNumber = parseFloat(displayValue);
+        const result = operate(operator, firstNumber, secondNumber);
+        displayValue = result.toString();
+        screenText.textContent = displayValue;
+
+        firstNumber = result;
+        secondNumber = 0;
+        operator = "";
+        operatorJustClicked = false;
+        if (activeOperatorBtn) {
+          activeOperatorBtn.classList.remove('operator-active');
+          activeOperatorBtn = null;
+        }
+        return;
+      }
+
+      else {
+        if(operatorJustClicked){
+          displayValue = "";
+          operatorJustClicked = false;
+        }
+        displayValue += buttonValue;
+        screenText.textContent = displayValue;
+      }
+    });
+  });
+}
+
+runCalculator();
